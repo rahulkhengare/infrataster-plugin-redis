@@ -18,7 +18,22 @@ module Infrataster
         end 
 
         # Initialize the redis obj
-        resource.redis = Redis.new(:host=>"#{options[:host]}", :port=>"#{options[:port]}", :db=>"#{options[:db]}")
+        if options.has_key?(:url)
+          # In case of URL pass
+          resource.redis = Redis.new(:url => "#{options[:url]}")
+        elsif options.has_key?(:password)
+          # In case of password protected redis
+          resource.redis = Redis.new(:host=>"#{options[:host]}",
+                                     :port=>"#{options[:port]}",
+                                     :db=>"#{options[:db]}",
+                                     :password=> "#{options[:password]}")
+        else
+          # default connection options
+          resource.redis = Redis.new(:host=>"#{options[:host]}",
+                                     :port=>"#{options[:port]}",
+                                     :db=>"#{options[:db]}")
+        end
+
         if resource.redis.respond_to?(query)
           # Run query 
           resource.redis.method(query).call(*arguments)
